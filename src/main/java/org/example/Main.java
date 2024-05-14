@@ -2,6 +2,7 @@ package org.example;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,52 +10,51 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
 
+//        Sukurti klasę kuri turi failo pavadinimą ir int masyvą.
+//        Klasėje sukurti funkciją kuri masyvą surikiuoja pasinaudojant funkcija auksčiau.
+//        Sukurti surikiuoto masyvo atspausdinimo į failą funkciją.
+//        Sukurti funkciją kuri gauna visus txt ir csv failus nurodytoje direktorijoje
+
         Skaiciai skaiciai = new Skaiciai();
-        int i = 0;
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(skaiciai.fileReadCSV));
-            String line;
-            while((line = bufferedReader.readLine()) != null){
-                skaiciai.array[i] = Integer.parseInt(line);
-                i++;
-            }
-            bufferedReader.close();
-        } catch (IOException e){
-            System.err.println("Nepavyko skaityti failo: " + e.getMessage());
-        }
+        int i = skaiciai.skaitytiCSV(skaiciai.fileReadCSV); // nuskaito duomenis iš csv failo, grąžina masyvo dydį
         int[] array = new int[i];
         for(int j = 0; j < i; j++){
             array[j] = skaiciai.array[j];
         }
-        skaiciai.sort(array);
-        try{
-            FileWriter fileWriter = new FileWriter(skaiciai.fileWriteCSV, false);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            for(int j = 0; j < i; j++){
-                bufferedWriter.write(Integer.toString(array[j]));
-                bufferedWriter.newLine();
-            }
-            System.out.println("Eksportuota sėkmingai.");
-            bufferedWriter.close();
-            fileWriter.close();
-        } catch (IOException e){
-            System.err.println("Nepavyko įrašyti į failą: " + e.getMessage());
+        skaiciai.sort(array); //rūšiuojame masyvą
+        for(int j = 0; j < i; j++){
+            skaiciai.array[j] = array[j];
         }
+        skaiciai.rasytiCSV(i); //įrašome į csv failą rūšiuotą masyvą
 
         //Funkcija gauti failus is direktorijos. (Failų sąrašą reikia gražinti string masyvu)
-        String directoryPath = "C:\\JavaTest";
+        String directoryPath = "C:\\JavaTest\\kartojimas_samples\\";
         String[] fileList = skaiciai.listTextAndCsvFiles(directoryPath);
 
-//        for(Path item: fileList){
-//            System.out.println(item.toString());
-//        }
+        //nuskaityti visus txt ir csv failus direktorijoje kurią duodame.
+        // Duomenis priskirti mūsų sukurtai klasei - Failo pavadinimas ir int masyvas
+        // Sukurti klasę failobazineinformacija, kuri turi failo pavadinimą, failo vietą ir failo dydį (string, string, string)
+        // Iš mūsų jau sukurtos klasės ištrinti pavadinimo narį ir mūsų klasė turi paveldėti failobazineinformacija klasę.
+        Skaiciai[] skaiciaiArray = new Skaiciai[100];
+        for(int j = 0; j < fileList.length; j++){
+            int dydis = skaiciai.skaitytiCSV("C:\\JavaTest\\kartojimas_samples\\" + fileList[j]);
+            array = new int[dydis];
+            for(int k = 0; k < dydis; k++){
+                array[k] = skaiciai.array[k];
+            }
+            //skaiciaiArray[j] = new Skaiciai(fileList[j], skaiciai.array);
+            //skaiciaiArray[j] = new Skaiciai(fileList[j], array);
+            skaiciaiArray[j] = new Skaiciai(fileList[j],
+                    "C:\\JavaTest\\kartojimas_samples\\",
+                    skaiciai.getFileSizeInKB(Paths.get("C:\\JavaTest\\kartojimas_samples\\" + fileList[j])),
+                    array);
+        }
         System.out.println();
 
+//        Sukurti klasę kuri turi string masyva ir galėti jį surikiuoti.
+//        Patobulinti nuskaitymą string masyvams iš failo
 
 
-
-        //Paleidus programą, ji turi nuskaityti visus txt ir csv failus direktorijoje kurią duodame.
-        // Duomenis priskirti mūsų sukurtai klasei - Failo pavadinimas ir int masyvas
 
 
 
