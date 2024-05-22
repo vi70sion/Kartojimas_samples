@@ -3,31 +3,39 @@ package org.example;
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class Skaiciai extends Failobazineinformacija{
-    public String fileReadCSV = "C:\\JavaTest\\kartojimas_samples\\Skaiciai.csv";
-    public String fileWriteCSV = "C:\\JavaTest\\kartojimas_samples\\Skaiciai_sort.csv";
+public class Failas extends Failobazineinformacija{
     public int[] array = new int[100] ;
-    //public String fileName;
+    public String[] textArray = new String[100];
 
-    public Skaiciai(String failoPavadinimas, String failoVieta, String failoDydis, int[] array) {
-    //public Skaiciai(String fileName, int[] array) {
+    public Failas(String failoPavadinimas, String failoVieta, String failoDydis, int[] array) {
         super(failoPavadinimas, failoVieta, failoDydis );
-        //this.fileName = fileName;
         this.array = array;
     }
-    public Skaiciai() {
+    public Failas(String failoPavadinimas, String failoVieta, String failoDydis, String[] textArray) {
+        super(failoPavadinimas, failoVieta, failoDydis );
+        this.textArray = textArray;
+    }
+
+    public Failas() {
         super();
     }
 
-    public int skaitytiCSV(String filePath){
-        int i = 0;
+    public int[] skaitytiCSV(String filePath){
+        int[] parametrai = new int[] {0, 1};    //nuskaityto failo dydis [0]- 0; tikimasi nuskaityti skaičių failą [1]- 1
+        int i = 0;  //skaičiuosim failo dydį
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
             String line;
             while((line = bufferedReader.readLine()) != null){
-                array[i] = Integer.parseInt(line);
+                try{
+                    array[i] = Integer.parseInt(line);  //nebus gerai, prarasime eilutę, jei tekstinio failo atveju bus eilutė vien iš skaičių
+                } catch (NumberFormatException e){
+                    parametrai[1] = 0;  //randame tekstinį failą
+                    textArray[i] = line;
+                }
                 i++;
             }
             bufferedReader.close();
@@ -35,15 +43,17 @@ public class Skaiciai extends Failobazineinformacija{
         } catch (IOException e){
             System.err.println("Nepavyko skaityti failo: " + e.getMessage());
         }
-        return i;
+        parametrai[0] = i;
+        return parametrai;
     }
 
-    public void rasytiCSV(int i){
+    public void rasytiCSV(int[] param, String filePath){
         try{
-            FileWriter fileWriter = new FileWriter(fileWriteCSV, false);
+            FileWriter fileWriter = new FileWriter(filePath, false);
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            for(int j = 0; j < i; j++){
-                bufferedWriter.write(Integer.toString(array[j]));
+            for(int j = 0; j < param[0]; j++){
+                if(param[1] == 1) bufferedWriter.write(Integer.toString(array[j])); //1- skaičių ar 0- tekstinis masyvas
+                    else bufferedWriter.write(textArray[j]);
                 bufferedWriter.newLine();
             }
             bufferedWriter.close();
@@ -69,6 +79,10 @@ public class Skaiciai extends Failobazineinformacija{
             }
             n--;
         } while (swapped);
+    }
+
+    public void sort(String[] array) {
+        Arrays.sort(array);
     }
 
     public String[] listTextAndCsvFiles(String directoryPath) {

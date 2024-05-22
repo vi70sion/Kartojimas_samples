@@ -1,11 +1,6 @@
 package org.example;
 
-import java.io.*;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,49 +10,74 @@ public class Main {
 //        Sukurti surikiuoto masyvo atspausdinimo į failą funkciją.
 //        Sukurti funkciją kuri gauna visus txt ir csv failus nurodytoje direktorijoje
 
-        Skaiciai skaiciai = new Skaiciai();
-        int i = skaiciai.skaitytiCSV(skaiciai.fileReadCSV); // nuskaito duomenis iš csv failo, grąžina masyvo dydį
-        int[] array = new int[i];
-        for(int j = 0; j < i; j++){
-            array[j] = skaiciai.array[j];
+        //String fileReadCSV = "C:\\JavaTest\\kartojimas_samples\\Skaiciai.csv";
+        //String fileWriteCSV = "C:\\JavaTest\\kartojimas_samples\\Skaiciai_sort.csv";
+
+        String fileReadCSV = "C:\\JavaTest\\kartojimas_samples\\Tekstas.csv";
+        String fileWriteCSV = "C:\\JavaTest\\kartojimas_samples\\Tekstas_sort.csv";
+
+        Failas failas = new Failas();
+        int[] parametrai = new int[]{0, 0};  // [0]- nuskaityto masyvo dydis, [1]- reikšmė: 1- skaičių failas; 0- tekstinis failas
+        parametrai = failas.skaitytiCSV(fileReadCSV); // nuskaito duomenis iš csv failo, grąžina parametrų masyvą
+        if(parametrai[1] == 1){ //skaičių failas
+            int[] temp = new int[parametrai[0]];
+            for(int j = 0; j < parametrai[0]; j++){ //perrašome tik nuskaitytus duomenis
+                temp[j] = failas.array[j];
+            }
+            failas.sort(temp); //rūšiuojame masyvą
+            failas.array = temp;
+        } else {    //tekstinis failas
+            String[] temp = new String[parametrai[0]];
+            for(int j = 0; j < parametrai[0]; j++){ //perrašome tik nuskaitytus duomenis
+                temp[j] = failas.textArray[j];
+            }
+            failas.sort(temp); //rūšiuojame masyvą
+            failas.textArray = temp;
         }
-        skaiciai.sort(array); //rūšiuojame masyvą
-        for(int j = 0; j < i; j++){
-            skaiciai.array[j] = array[j];
-        }
-        skaiciai.rasytiCSV(i); //įrašome į csv failą rūšiuotą masyvą
+        failas.rasytiCSV(parametrai, fileWriteCSV); //įrašome į csv failą rūšiuotą masyvą
 
         //Funkcija gauti failus is direktorijos. (Failų sąrašą reikia gražinti string masyvu)
-        String directoryPath = "C:\\JavaTest\\kartojimas_samples\\";
-        String[] fileList = skaiciai.listTextAndCsvFiles(directoryPath);
-
         //nuskaityti visus txt ir csv failus direktorijoje kurią duodame.
         // Duomenis priskirti mūsų sukurtai klasei - Failo pavadinimas ir int masyvas
         // Sukurti klasę failobazineinformacija, kuri turi failo pavadinimą, failo vietą ir failo dydį (string, string, string)
         // Iš mūsų jau sukurtos klasės ištrinti pavadinimo narį ir mūsų klasė turi paveldėti failobazineinformacija klasę.
-        Skaiciai[] skaiciaiArray = new Skaiciai[100];
-        for(int j = 0; j < fileList.length; j++){
-            int dydis = skaiciai.skaitytiCSV("C:\\JavaTest\\kartojimas_samples\\" + fileList[j]);
-            array = new int[dydis];
-            for(int k = 0; k < dydis; k++){
-                array[k] = skaiciai.array[k];
-            }
-            //skaiciaiArray[j] = new Skaiciai(fileList[j], skaiciai.array);
-            //skaiciaiArray[j] = new Skaiciai(fileList[j], array);
-            skaiciaiArray[j] = new Skaiciai(fileList[j],
-                    "C:\\JavaTest\\kartojimas_samples\\",
-                    skaiciai.getFileSizeInKB(Paths.get("C:\\JavaTest\\kartojimas_samples\\" + fileList[j])),
-                    array);
-        }
+
+        String directoryPath = "C:\\JavaTest\\kartojimas_samples\\";
+        String[] fileList = failas.listTextAndCsvFiles(directoryPath);  //nuskaitome failų pavadinimus
+        Failas[] failuArray = new Failas[fileList.length];
         System.out.println();
-
-//        Sukurti klasę kuri turi string masyva ir galėti jį surikiuoti.
-//        Patobulinti nuskaitymą string masyvams iš failo
-
-
-
-
-
+        for(int i = 0; i < fileList.length; i++){
+            parametrai = failas.skaitytiCSV("C:\\JavaTest\\kartojimas_samples\\" + fileList[i]);
+            if(parametrai[1] == 1){
+                int[] temp = new int[parametrai[0]];
+                for(int j = 0; j < parametrai[0]; j++){ //perrašome tik nuskaitytus duomenis
+                    temp[j] = failas.array[j];
+                }
+                failuArray[i] = new Failas(fileList[i],
+                        "C:\\JavaTest\\kartojimas_samples\\",
+                        failas.getFileSizeInKB(Paths.get("C:\\JavaTest\\kartojimas_samples\\" + fileList[i])),
+                        temp);
+            } else {
+                String[] temp = new String[parametrai[0]];
+                for(int j = 0; j < parametrai[0]; j++){ //perrašome tik nuskaitytus duomenis
+                    temp[j] = failas.textArray[j];
+                }
+                failuArray[i] = new Failas(fileList[i],
+                        "C:\\JavaTest\\kartojimas_samples\\",
+                        failas.getFileSizeInKB(Paths.get("C:\\JavaTest\\kartojimas_samples\\" + fileList[i])),
+                        temp);
+            }
+        }
+        System.out.println("Išvedame failų informaciją: ");
+        for(Failas item: failuArray){
+            if(item.textArray[0] == null){  //neturi String masyvo, vadinasi turi int masyvą; reikėtų tikrinti ar visi lygūs null
+                System.out.println(item.failoPavadinimas + ", vieta: " + item.failoVieta +
+                        ", dydis: " + item.failoDydis + "B, " + item.array);
+            } else {
+                System.out.println(item.failoPavadinimas + ", vieta: " + item.failoVieta +
+                        ", dydis: " + item.failoDydis + "B, " + item.textArray);
+            }
+        }
 
     }
 }
